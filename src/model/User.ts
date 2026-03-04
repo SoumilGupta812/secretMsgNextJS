@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
-
+//older practice to extend Document for better type inference, but with newer versions of Mongoose and TypeScript, you can often just define your interfaces without extending Document and it will still work well.
+//can remove extends Document if you prefer, but it can help with type inference in some cases such as when using Mongoose's built-in methods that return documents
 export interface Message extends Document {
   content: string;
   createdAt: Date;
