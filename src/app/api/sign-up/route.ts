@@ -58,6 +58,7 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
+    console.log("Verification email sent successfully", emailResponse.message);
     return Response.json(
       {
         success: true,
