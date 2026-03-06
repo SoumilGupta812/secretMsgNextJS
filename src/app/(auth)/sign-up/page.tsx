@@ -18,12 +18,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText,
-  InputGroupTextarea,
-} from "@/components/ui/input-group";
+
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
@@ -72,6 +67,12 @@ export default function SignUp() {
       const response = await axios.post("/api/sign-up", data);
       toast.success("Success!", {
         description: response.data.message,
+        position: "top-center",
+        style: {
+          background: "#10b981",
+          color: "#ffffff",
+          border: "1px solid #059669",
+        },
       });
       router.replace(`/verify/${username}`);
       setIsSubmitting(false);
@@ -81,6 +82,12 @@ export default function SignUp() {
       toast.error("Error!", {
         description:
           axiosError.response?.data.message || "Error during sign up",
+        position: "top-center",
+        style: {
+          background: "#ef4444",
+          color: "#ffffff",
+          border: "1px solid #dc2626",
+        },
       });
       setIsSubmitting(false);
     }
@@ -123,6 +130,7 @@ export default function SignUp() {
                     onChange={(e) => {
                       field.onChange(e);
                       debounced(e.target.value);
+                      setUsernameMessage("");
                     }}
                     id="form-rhf-demo-username"
                     aria-invalid={fieldState.invalid}
@@ -130,22 +138,35 @@ export default function SignUp() {
                     autoComplete="off"
                     className="bg-gray-800/50 border border-indigo-500/30 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500/20"
                   />
-                  {isCheckingUsername && (
+                  {fieldState.invalid ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : isCheckingUsername ? (
                     <FieldDescription className="text-xs text-yellow-400">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking
                       username...
                     </FieldDescription>
-                  )}
-                  {usernameMessage && !isCheckingUsername && (
+                  ) : usernameMessage ? (
                     <FieldDescription
                       className={`text-xs ${usernameMessage.includes("available") ? "text-green-400" : "text-red-400"}`}
                     >
                       {usernameMessage}
                     </FieldDescription>
+                  ) : null}
+                  {/* {!fieldState.invalid && isCheckingUsername && (
+                    <FieldDescription className="text-xs text-yellow-400">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking
+                      username...
+                    </FieldDescription>
                   )}
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {usernameMessage &&
+                    !isCheckingUsername &&
+                    !fieldState.invalid && (
+                      <FieldDescription
+                        className={`text-xs ${usernameMessage.includes("available") ? "text-green-400" : "text-red-400"}`}
+                      >
+                        {usernameMessage}
+                      </FieldDescription>
+                    )} */}
                 </Field>
               )}
             />
