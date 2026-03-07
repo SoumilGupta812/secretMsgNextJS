@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         success: true,
-        message: "acceptMessages status updated successfully",
+        message: "AcceptMessages status updated successfully",
         updatedUser,
       },
       { status: 200 },
