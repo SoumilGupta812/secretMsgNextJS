@@ -4,6 +4,7 @@ import dbConnect from "@/lib/dbconnect";
 import UserModel from "@/model/User";
 import { User } from "next-auth";
 import mongoose from "mongoose";
+import { use } from "react";
 export async function GET(request: Request) {
   await dbConnect();
   const session = await getServerSession(authOptions);
@@ -28,11 +29,14 @@ export async function GET(request: Request) {
         },
       },
     ]);
-    if (!user || user.length === 0) {
+    if (!user) {
       return Response.json(
-        { success: false, message: "User not found or no messages" },
+        { success: false, message: "User not found" },
         { status: 404 },
       );
+    }
+    if (user.length === 0) {
+      return Response.json({ success: true, messages: [] }, { status: 200 });
     }
     return Response.json(
       { success: true, messages: user[0].messages },

@@ -15,10 +15,10 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials: any): Promise<any> {
         await dbConnect();
-        console.log(
-          "Attempting to authorize user with identifier:",
-          credentials,
-        );
+        // console.log(
+        //   "Attempting to authorize user with identifier:",
+        //   credentials,
+        // );
         try {
           const user = await UserModel.findOne({
             $or: [
@@ -72,6 +72,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 2 * 60 * 60,
+    updateAge: 1 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
