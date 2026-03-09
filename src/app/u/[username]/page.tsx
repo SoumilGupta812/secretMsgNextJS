@@ -16,11 +16,16 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { MessageSchema } from "@/schemas/messageSchema";
 export default function Page() {
+  const [message, setMessage] = useState([
+    "I saw what you did. Impressive.",
+    "Your favorite snack is also mine. Coincidence?",
+    "The pigeons have a message for you.",
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
   const { username } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof MessageSchema>>({
@@ -29,6 +34,25 @@ export default function Page() {
       content: "",
     },
   });
+  async function fetchSuggestion() {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`/api/suggest-messages`);
+      setMessage(response.data.suggestions);
+    } catch (error) {
+      toast.error("Failed to fetch suggestions. Please try again later.", {
+        position: "top-center",
+        style: {
+          background: "#ef4444",
+          color: "#ffffff",
+          border: "1px solid #dc2626",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   async function onSubmit(data: z.infer<typeof MessageSchema>) {
     try {
       setIsSubmitting(true);
@@ -136,6 +160,32 @@ export default function Page() {
             </Button>
           </Field>
         </form>
+        <div className="text-center mt-3 text-sm">
+          <Button
+            variant="link"
+            onClick={fetchSuggestion}
+            disabled={isLoading}
+            className="text-indigo-400 hover:text-indigo-500"
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
+            Get Secret Suggestions
+          </Button>
+        </div>
+        <div className="mt-4 space-y-2">
+          {message.map((msg, index) => (
+            <Input
+              key={index}
+              className="bg-gray-800/50 border overflow-x-auto border-indigo-500/30  text-white p-3 rounded-md w-full cursor-pointer hover:bg-gray-700/50 focus:bg-gray-700/50 transition-colors"
+              value={msg}
+              readOnly
+              onClick={(e) => form.setValue("content", e.target.value)}
+            />
+          ))}
+        </div>
         <div className="text-center mt-3 text-sm text-gray-600">
           Want to have your own secret messages?{" "}
           <Link href="/sign-up" className="text-blue-500 underline">
