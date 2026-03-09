@@ -27,7 +27,7 @@ export async function DELETE(
   try {
     const updatedresult = await UserModel.updateOne(
       {
-        _id: new mongoose.Types.ObjectId(user.id),
+        _id: user._id,
       },
       {
         $pull: { messages: { _id: new mongoose.Types.ObjectId(messageId) } },
