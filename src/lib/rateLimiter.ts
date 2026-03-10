@@ -3,7 +3,7 @@ import { redis } from "./redis";
 
 export const apiLimiter = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(20, "1 m"),
+  limiter: Ratelimit.slidingWindow(5, "1 m"),
   prefix: "api-rate-limit",
 });
 

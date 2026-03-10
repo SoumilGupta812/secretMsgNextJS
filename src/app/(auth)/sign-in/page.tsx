@@ -39,6 +39,17 @@ export default function SignUp() {
       redirect: false,
     });
     console.log("Sign in result:", result);
+    if (result?.error === "RATE_LIMIT") {
+      toast.error("Too Many Attempts.", {
+        description: "Please Try Again Later",
+        position: "top-center",
+        style: {
+          background: "#ef4444",
+          color: "#ffffff",
+          border: "1px solid #dc2626",
+        },
+      });
+    }
     if (result?.error) {
       toast.error("Login Failed", {
         description: result.error || "Incorrect email/username or password",
@@ -63,6 +74,7 @@ export default function SignUp() {
       // router.refresh();
       router.replace("/dashboard");
     }
+
     setIsSubmitting(false);
   }
   return (

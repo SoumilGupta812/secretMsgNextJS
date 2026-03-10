@@ -3,6 +3,8 @@ import { NextAuthOptions } from "next-auth";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbconnect";
 import UserModel from "@/model/User";
+import { getIdentifier } from "@/lib/identifier";
+import { loginLimiter } from "@/lib/rateLimiter";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -20,6 +22,11 @@ export const authOptions: NextAuthOptions = {
         //   credentials,
         // );
         try {
+          const identifier = await getIdentifier();
+          const { success } = await loginLimiter.limit(identifier);
+          if (!success) {
+            throw new Error("RATE_LIMIT");
+          }
           const user = await UserModel.findOne({
             $or: [
               { email: credentials.identifier },

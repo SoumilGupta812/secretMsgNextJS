@@ -40,14 +40,36 @@ export default function Page() {
       const response = await axios.get(`/api/suggest-messages`);
       setMessage(response.data.suggestions);
     } catch (error) {
-      toast.error("Failed to fetch suggestions. Please try again later.", {
-        position: "top-center",
-        style: {
-          background: "#ef4444",
-          color: "#ffffff",
-          border: "1px solid #dc2626",
-        },
-      });
+      const axiosError = error as AxiosError<ApiResponse>;
+      if (axiosError.response) {
+        const errorStatus = axiosError.response.status;
+        const reset = axiosError.response.headers["x-ratelimit-reset"];
+        if (errorStatus === 429) {
+          const resetTime = reset;
+          const waitMinutes = resetTime
+            ? Math.ceil((Number(resetTime) - Date.now()) / 1000 / 60)
+            : 60;
+          toast.error(axiosError.response.data.message, {
+            description: `Limit reached! Try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`,
+            position: "top-center",
+            style: {
+              background: "#ef4444",
+              color: "#ffffff",
+              border: "1px solid #dc2626",
+            },
+            duration: 3000,
+          });
+        } else {
+          toast.error("Failed to fetch suggestions. Please try again later.", {
+            position: "top-center",
+            style: {
+              background: "#ef4444",
+              color: "#ffffff",
+              border: "1px solid #dc2626",
+            },
+          });
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +204,7 @@ export default function Page() {
               className="bg-gray-800/50 border overflow-x-auto border-indigo-500/30  text-white p-3 rounded-md w-full cursor-pointer hover:bg-gray-700/50 focus:bg-gray-700/50 transition-colors"
               value={msg}
               readOnly
-              onClick={(e) => form.setValue("content", e.target.value)}
+              onClick={(e) => form.setValue("content", msg)}
             />
           ))}
         </div>
