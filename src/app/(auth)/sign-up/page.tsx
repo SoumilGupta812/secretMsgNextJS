@@ -21,13 +21,19 @@ import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useAsyncValidator } from "@/hooks/useAsyncValidator";
+import { usernameValidator } from "@/helpers/usernameValidator";
+import { passwordValidator } from "@/helpers/passwordValidator";
 
 export default function SignUp() {
-  const [username, setUsername] = useState("");
-  const [usernameMessage, setUsernameMessage] = useState("");
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const {
+    value: username,
+    debounced,
+    setMessage: setUsernameMessage,
+    message: usernameMessage,
+    isChecking: isCheckingUsername,
+  } = useAsyncValidator(usernameValidator, 500);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const debounced = useDebounceCallback(setUsername, 500);
   const router = useRouter();
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
@@ -37,30 +43,14 @@ export default function SignUp() {
       password: "",
     },
   });
+  const {
+    value: password,
+    setMessage: setPasswordMessage,
+    message: passwordMessage,
+    isChecking: isCheckingPassword,
+    debounced: debouncedPassword,
+  } = useAsyncValidator(passwordValidator, 500);
 
-  useEffect(() => {
-    async function checkUsernameUnique() {
-      if (username) {
-        setIsCheckingUsername(true);
-        setUsernameMessage("");
-        try {
-          const response = await axios.get(
-            `/api/check-username-unique?username=${username}`,
-          );
-          setUsernameMessage(response.data.message);
-        } catch (error) {
-          const axiosError = error as AxiosError<ApiResponse>;
-          setUsernameMessage(
-            axiosError.response?.data.message ||
-              "Error checking username uniqueness",
-          );
-        } finally {
-          setIsCheckingUsername(false);
-        }
-      }
-    }
-    checkUsernameUnique();
-  }, [username]);
   async function onSubmit(data: z.infer<typeof signUpSchema>) {
     setIsSubmitting(true);
     try {
@@ -152,21 +142,6 @@ export default function SignUp() {
                       {usernameMessage}
                     </FieldDescription>
                   ) : null}
-                  {/* {!fieldState.invalid && isCheckingUsername && (
-                    <FieldDescription className="text-xs text-yellow-400">
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking
-                      username...
-                    </FieldDescription>
-                  )}
-                  {usernameMessage &&
-                    !isCheckingUsername &&
-                    !fieldState.invalid && (
-                      <FieldDescription
-                        className={`text-xs ${usernameMessage.includes("available") ? "text-green-400" : "text-red-400"}`}
-                      >
-                        {usernameMessage}
-                      </FieldDescription>
-                    )} */}
                 </Field>
               )}
             />
@@ -210,6 +185,11 @@ export default function SignUp() {
 
                   <Input
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      debouncedPassword(e.target.value);
+                      setPasswordMessage("");
+                    }}
                     id="form-rhf-demo-password"
                     type="password"
                     aria-invalid={fieldState.invalid}
@@ -217,9 +197,20 @@ export default function SignUp() {
                     autoComplete="off"
                     className="bg-gray-800/50 border border-indigo-500/30 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500/20"
                   />
-                  {fieldState.invalid && (
+                  {fieldState.invalid ? (
                     <FieldError errors={[fieldState.error]} />
-                  )}
+                  ) : isCheckingPassword ? (
+                    <FieldDescription className="text-xs text-yellow-400">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking
+                      password...
+                    </FieldDescription>
+                  ) : passwordMessage ? (
+                    <FieldDescription
+                      className={`text-xs ${passwordMessage.includes("Strong") ? "text-green-400" : "text-red-400"}`}
+                    >
+                      {passwordMessage}
+                    </FieldDescription>
+                  ) : null}
                 </Field>
               )}
             />

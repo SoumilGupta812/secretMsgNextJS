@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { apiLimiter, loginLimiter } from "./lib/rateLimiter";
+import { apiLimiter } from "./lib/rateLimiter";
 import { getIdentifier } from "./lib/identifier";
 export { default } from "next-auth/middleware";
 const authRoutes = ["/sign-in", "/sign-up", "/verify"];
 const protectedRoutes = ["/dashboard"];
-const loginRoute = ["/api/auth/callback/credentials"];
+// const loginRoute = ["/api/auth/callback/credentials"];
 const suggestionsRoute = ["/api/suggest-messages"];
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
@@ -16,9 +16,7 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) =>
     url.pathname.startsWith(route),
   );
-  const isLoginRoute = loginRoute.some((route) =>
-    url.pathname.startsWith(route),
-  );
+
   const isSuggestionsRoute = suggestionsRoute.some((route) =>
     url.pathname.startsWith(route),
   );
