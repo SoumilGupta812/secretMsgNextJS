@@ -38,7 +38,7 @@ export default function SignUp() {
       password: data.password,
       redirect: false,
     });
-    console.log("Sign in result:", result);
+    // console.log("Sign in result:", result);
     if (result?.error === "RATE_LIMIT") {
       toast.error("Too Many Attempts.", {
         description: "Please Try Again Later",
