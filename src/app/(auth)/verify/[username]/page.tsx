@@ -62,7 +62,6 @@ export default function VerifyPage() {
           border: "1px solid #dc2626",
         },
       });
-      router.replace(`/sign-up`);
     } finally {
       setIsVerifying(false);
     }
